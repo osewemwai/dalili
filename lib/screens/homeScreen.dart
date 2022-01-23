@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Position? _currentPosition;
+  String? _currentAddress;
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .then((Position position) {
       setState(() {
         _currentPosition = position;
+        _getAddressFromCoordinates();
       });
     }).catchError((e) {
       print(e);
