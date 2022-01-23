@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -18,19 +20,22 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Center(
           child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          if (_currentPosition != null)
-            Text(
-                'LAT: ${_currentPosition?.latitude}, LONG: ${_currentPosition?.longitude}'),
-          TextButton(
-            child: const Text('Get Location'),
-            onPressed: () {
-              determinePosition();
-            },
-          )
-        ],
-      )),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (_currentPosition != null)
+                Text(
+                    'LAT: ${_currentPosition
+                        ?.latitude}, LONG: ${_currentPosition?.longitude} '),
+              if(_currentAddress != null)
+                Text(_currentAddress!),
+              TextButton(
+                child: const Text('Get Location'),
+                onPressed: () {
+                  determinePosition();
+                },
+              )
+            ],
+          )),
     );
   }
 
@@ -55,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    if(permission == LocationPermission.deniedForever){
+    if (permission == LocationPermission.deniedForever) {
       return Future.error('Location permissions are permanently denied');
     }
     return await _getCurrentLocation();
@@ -63,8 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _getCurrentLocation() async {
     await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.best,
-            forceAndroidLocationManager: true)
+        desiredAccuracy: LocationAccuracy.best,
+        forceAndroidLocationManager: true)
         .then((Position position) {
       setState(() {
         _currentPosition = position;
@@ -73,4 +78,21 @@ class _HomeScreenState extends State<HomeScreen> {
       print(e);
     });
   }
+
+  //Turn coodinates into human readable text
+  _getAddressFromCoordinates() async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+         _currentPosition!.latitude,
+          _currentPosition!.longitude
+      );
+      Placemark place = placemarks[0];
+      setState(() {
+        _currentAddress = "${place.locality}, ${place.postalCode}, ${place.country}";
+      });
+    } catch(e){
+      print(e);
+    }
+  }
+
 }
